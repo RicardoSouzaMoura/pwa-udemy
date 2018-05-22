@@ -27,7 +27,7 @@ self.addEventListener('activate', function(event){
 });
 
 self.addEventListener('fetch', function(event){
-    console.log(" [ServiceWorker] Fetch something ...", event);
+    //console.log(" [ServiceWorker] Fetch something ...", event);
     //event.respondWith(fetch(event.request, {}));
     event.respondWith(
         caches.match(event.request)
@@ -36,7 +36,14 @@ self.addEventListener('fetch', function(event){
                     return response;
                 }
                 else{
-                    return fetch(event.request);
+                    return fetch(event.request)
+                        .then(function(res){
+                            return caches.open("dynamic")
+                                .then(function(cache){
+                                    cache.put(event.request.url, res.clone());
+                                    return res;
+                                });
+                        });
                 }
             })
     );
