@@ -43,6 +43,9 @@ self.addEventListener('fetch', function(event){
                                     cache.put(event.request.url, res.clone());
                                     return res;
                                 });
+                        })
+                        .catch(function(error){
+
                         });
                 }
             })
