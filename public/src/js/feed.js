@@ -43,22 +43,29 @@ function onCardSaveButton(event){
   }
 }
 
-function createCard() {
+function clearCards() {
+  while(sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = 'url("'+data.image+'")';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
+  cardTitleTextElement.style.color="white";
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   /* let cardSaveButton = document.createElement("button");
   cardSupportingText.appendChild(cardSaveButton);
@@ -69,10 +76,49 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch('https://httpbin.org/get')
+function updateUI(data){
+  clearCards();
+  for(var i=0; i < data.length; i++){
+    createCard(data[i]);
+  }
+}
+
+const url = "https://pwadb-24d96.firebaseio.com/posts.json";
+let networkDataReceived = false;
+
+fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
-    createCard();
+    networkDataReceived = true;
+    console.log('From web', data);
+    
+    let dataArray = [];
+    for(let key in data){
+      dataArray.push(data[key]);
+    }
+    updateUI(dataArray);
   });
+
+  if ('caches' in window) {
+      caches.match(url)
+        .then(function(res){
+          if (res){
+            console.log('res', res.json);
+            return res.json;
+          }
+        })
+        .then(function(data){
+          console.log('From cache', data);
+          console.log("networkDataReceived: "+networkDataReceived);
+            if (!networkDataReceived){
+              let dataArray = [];
+              for(let key in data){
+                dataArray.push(data[key]);
+              }
+              console.log("dataArray: "+dataArray);
+              updateUI(dataArray);
+            }
+          });
+}
