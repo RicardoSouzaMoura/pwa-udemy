@@ -105,8 +105,7 @@ fetch(url)
       caches.match(url)
         .then(function(res){
           if (res){
-            console.log('res', res.json);
-            return res.json;
+            return res.json();
           }
         })
         .then(function(data){
@@ -117,7 +116,6 @@ fetch(url)
               for(let key in data){
                 dataArray.push(data[key]);
               }
-              console.log("dataArray: "+dataArray);
               updateUI(dataArray);
             }
           });

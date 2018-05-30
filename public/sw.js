@@ -1,5 +1,5 @@
-const STATIC_CACHE_NAME = "static-v11";
-const DYNAMIC_CACHE_NAME = "dynamic-v5";
+const STATIC_CACHE_NAME = "static-v14";
+const DYNAMIC_CACHE_NAME = "dynamic-v7";
 const STATIC_FILES = [
     '/',
     '/index.html',
