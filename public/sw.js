@@ -1,4 +1,9 @@
-const STATIC_CACHE_NAME = "static-v14";
+
+importScripts("/src/js/idb.js");
+importScripts("/src/js/utilityDB.js");
+
+
+const STATIC_CACHE_NAME = "static-v20";
 const DYNAMIC_CACHE_NAME = "dynamic-v7";
 const STATIC_FILES = [
     '/',
@@ -6,6 +11,8 @@ const STATIC_FILES = [
     '/offline.html',
     '/src/js/app.js',
     '/src/js/feed.js',
+    "/src/js/idb.js",
+    "/src/js/utilityDB.js",
     //'/src/js/promise.js',
     //'/src/js/fetch.js',
     '/src/js/material.min.js',
@@ -16,6 +23,8 @@ const STATIC_FILES = [
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
   ];
+
+
 
   self.addEventListener('install', function (event) {
     console.log('[Service Worker] Installing Service Worker ...', event);
@@ -60,17 +69,23 @@ self.addEventListener('fetch', function (event) {
     // event.respondWith(
     //   fetch(event.request)
     // );
+    
     var url = "https://pwadb-24d96.firebaseio.com/posts.json";
     if (event.request.url.indexOf(url) > -1) {
       event.respondWith(
-        caches.open(DYNAMIC_CACHE_NAME)
-          .then(function (cache) {
-            return fetch(event.request)
-              .then(function (res) {
-                // trimCache(CACHE_DYNAMIC_NAME, 3);
-                cache.put(event.request, res.clone());
-                return res;
+        fetch(event.request)
+          .then(function (res) {
+            let clonedRes = res.clone();
+            clearAllData("posts")
+              .then(function(){
+                return clonedRes.json();
+              })
+              .then(function(data){
+                for(let key in data){
+                  writeData("posts", data[key]);
+                }
               });
+            return res;
           })
       );
      } else if (isInArray(event.request.url, STATIC_FILES)) {
