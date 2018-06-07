@@ -3,6 +3,10 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
 const USER_CACHE_NAME = 'user-cache';
+var form = document.querySelector("form");
+let titleInput;
+let locationInput;
+
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
@@ -110,3 +114,61 @@ if ('indexedDB' in window) {
           }
         });
 }
+
+function sendData(){
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: {
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: "https://firebasestorage.googleapis.com/v0/b/pwadb-24d96.appspot.com/o/sf-boat.jpg?alt=media&token=704e7c07-9301-46d9-86b0-3cda6ce1a369"
+    }
+  })
+  .then(function(res){
+    console.log("res: ", res);
+    //updateUI(data);
+  });
+}
+
+form.addEventListener("submit", function(event){
+  event.preventDefault();
+  titleInput = document.querySelector("#title");
+  locationInput = document.querySelector("#location");
+
+  if (titleInput.value.trim() === "" || locationInput.value.trim() === ""){
+    alert("Please enter the mandatory fields !!!");
+    return;
+  }
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window){
+    navigator.serviceWorker.ready
+      .then(function(sw){
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        }
+        writeData("sync-posts", post)
+          .then(function(){
+            return sw.sync.register("sync-new-post");
+          })
+          .then(function(){
+            let snackBarContainer = document.querySelector("#confirmation-toast");
+            let data = {message: "Your Post was Saved for Syncing !!"};
+            snackBarContainer.MaterialSnackBar.showSnackBar(data);
+          })
+          .catch(function(err){
+            console.log("Error: ", err);
+          });        
+      });
+  } else {
+    sendData();
+  }
+
+  closeCreatePostModal();
+});

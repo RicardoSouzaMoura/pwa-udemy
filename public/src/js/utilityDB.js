@@ -3,6 +3,9 @@
     if (!db.objectStoreNames.contains("posts")){
       db.createObjectStore("posts", {keyPath: "id"});
     }
+    if (!db.objectStoreNames.contains("sync-posts")){
+      db.createObjectStore("sync-posts", {keyPath: "id"});
+    }
   });
 
   function writeData(st, data){
