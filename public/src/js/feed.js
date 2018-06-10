@@ -87,7 +87,8 @@ function updateUI(data){
   }
 }
 
-const url = "https://pwadb-24d96.firebaseio.com/posts.json";
+//const url = "https://pwadb-24d96.firebaseio.com/posts.json";
+const url = "https://us-central1-pwadb-24d96.cloudfunctions.net/storePostData";
 let networkDataReceived = false;
 
 fetch(url)

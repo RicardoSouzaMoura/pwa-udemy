@@ -3,7 +3,7 @@ importScripts("/src/js/idb.js");
 importScripts("/src/js/utilityDB.js");
 
 
-const STATIC_CACHE_NAME = "static-v21";
+const STATIC_CACHE_NAME = "static-v20";
 const DYNAMIC_CACHE_NAME = "dynamic-v7";
 const STATIC_FILES = [
     '/',
@@ -70,7 +70,8 @@ self.addEventListener('fetch', function (event) {
     //   fetch(event.request)
     // );
     
-    var url = "https://pwadb-24d96.firebaseio.com/posts.json";
+    //var url = "https://pwadb-24d96.firebaseio.com/posts.json";
+    var url = "https://us-central1-pwadb-24d96.cloudfunctions.net/storePostData";
     if (event.request.url.indexOf(url) > -1) {
       event.respondWith(
         fetch(event.request)
@@ -123,4 +124,43 @@ self.addEventListener('fetch', function (event) {
             })
         );
       }
+  });
+
+  self.addEventListener('sync', function(event){
+    console.log("[ServiceWorker] Syncing background data");
+    if (event.tag === 'sync-posts'){
+      console.log("[ServiceWorker] Syncing new posts");
+      event.waitUntil(
+        readAllData()
+          .then(function(data){
+            for(let dt of data){
+              fetch(url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                },
+                body: {
+                  id: dt.id,
+                  title: dt.title,
+                  location: dt.location,
+                  image: dt.image
+                }
+              })
+              .then(function(res){
+                console.log("res: ", res);
+                if(res.ok){
+                  rs.json()
+                    .then(function(resData){
+                      deleteItemFromData('sync-posts', resData.id);
+                    });
+                }
+              })
+              .catch(function(err){
+                console.log("[ServiceWorker] Error while syncing", err);
+              });
+            }
+          })
+      );
+    }
   });

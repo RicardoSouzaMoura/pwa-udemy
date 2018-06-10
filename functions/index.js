@@ -5,8 +5,15 @@ const cors = require('cors')({origin:true});
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
- exports.helloWorld = functions.https.onRequest((request, response) => {
-     cors(function (request, response){
+var serviceAccount = require("./pwaudemy-fb-key.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://pwadb-24d96.firebaseio.com"
+  });
+
+ exports.storePostData = functions.https.onRequest((request, response) => {
+     cors(request, response, function (){
         admin.database().ref('posts').push({
             id: request.body.id,
             title: request.body.title,
@@ -14,7 +21,10 @@ const cors = require('cors')({origin:true});
             image: request.body.image
         })
         .then(function(){
-            response.status(201).json({message: 'Data Stored', id: request.body.id});
+            return response.status(201).json({message: 'Data Stored', id: request.body.id});
+        })
+        .catch(function(err){
+            return response.status(500).json({error: err});
         });
      });
   //response.send("Hello from Firebase!");
