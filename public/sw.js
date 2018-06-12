@@ -3,7 +3,7 @@ importScripts("/src/js/idb.js");
 importScripts("/src/js/utilityDB.js");
 
 
-const STATIC_CACHE_NAME = "static-v20";
+const STATIC_CACHE_NAME = "static-v21";
 const DYNAMIC_CACHE_NAME = "dynamic-v7";
 const STATIC_FILES = [
     '/',
